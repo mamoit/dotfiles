@@ -1,3 +1,10 @@
+# BASH Aliases
+alias ll='ls -l'
+alias l='ls -l'
+alias la='ls -la'
+alias lt='ls -lt'
+alias ltr='ls -ltr'
+
 # GIT Aliases
 alias st='git status'
 alias d='git diff --patience'
