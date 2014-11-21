@@ -1,1 +1,4 @@
 # Placeholder
+alias st='git status'
+alias d='git diff'
+
