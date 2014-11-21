@@ -1,4 +1,6 @@
-# Placeholder
+# GIT Aliases
 alias st='git status'
-alias d='git diff'
+alias d='git diff --patience'
+alias padd='git add -p'
+alias commit='git commit'
 
