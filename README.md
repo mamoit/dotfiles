@@ -1,4 +1,5 @@
-configs
-=======
+Dotfiles
+========
 
-Useful development configs
+Useful dotfiles.
+
