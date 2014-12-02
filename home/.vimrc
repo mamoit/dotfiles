@@ -28,3 +28,9 @@ set title
 " Optimize for fast terminal connections
 set ttyfast
 
+" Indentation
+set autoindent
+set smartindent
+set shiftwidth=2
+set softtabstop=2
+
