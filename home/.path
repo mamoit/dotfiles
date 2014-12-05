@@ -1,1 +1,3 @@
-# Placeholder
+# ~/bin
+export PATH="$PATH:$HOME/bin";
+
