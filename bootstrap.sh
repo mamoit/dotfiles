@@ -4,9 +4,32 @@ cd "$(dirname "${BASH_SOURCE}")";
 git pull origin master;
 
 function doIt() {
+	testGit
 	rsync --exclude ".git/" --exclude "bootstrap.sh" --exclude "README.md"\
 		 -avh --no-perms home/ ~;
 	source ~/.bash_profile;
+}
+
+function testGit() {
+	if [ -f ~/.gitconfig ]; then
+		name=`awk '/email/{print $3}' ~/.gitconfig`
+		email=`awk '/email/{print $3}' ~/.gitconfig`
+
+		if [[ $email =~ "" && $name =~ "" ]]; then
+			echo "WARNING: assuming $email as the default email for GIT (you may change it on your ~/.gitconfig)"
+			sed -i "s/NAMEPLACEHOLDER/$name/g" home/.gitconfig
+			sed -i "s/EMAILPLACEHOLDER/$email/g" home/.gitconfig
+			return
+		fi
+	fi
+
+	echo "Input new name to use"
+	read name
+	sed -i "s/NAMEPLACEHOLDER/$name/g" home/.gitconfig
+
+	echo "Input new email to use"
+	read email
+	sed -i "s/EMAILPLACEHOLDER/$email/g" home/.gitconfig
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then
@@ -20,4 +43,4 @@ else
 fi;
 
 unset doIt;
-
+unset testGit;
