@@ -12,7 +12,7 @@ function doIt() {
 
 function testGit() {
 	if [ -f ~/.gitconfig ]; then
-		name=`awk '/email/{print $3}' ~/.gitconfig`
+		name=`awk '/name/{print $3}' ~/.gitconfig`
 		email=`awk '/email/{print $3}' ~/.gitconfig`
 
 		if [[ $email =~ "" && $name =~ "" ]]; then
