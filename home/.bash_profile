@@ -6,3 +6,6 @@ for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
 done;
 unset file;
 
+if [ -f ~/.motd ]; then
+	cat ~/.motd
+fi

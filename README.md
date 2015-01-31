@@ -27,13 +27,14 @@ with further customization of your own.
 File          | Usage
 --------------|--------
 .aliases      | Command aliases (because everybody is lazy)
-.bash_profile | Sources the other files, edit it if you want to add extra files to this set.
-.bash_prompt  | Bash prompt colors, completions and whatnot.
+.bash_profile | Sources the other files, edit it if you want to add extra files to this set
+.bash_prompt  | Bash prompt colors, completions and whatnot
 .bashrc       | Entry point for all the other files, no need to change this
 .exports      | Some local variables
 .extras       | Name says it all, anything that doesn't fit anywhere else
 .functions    | Bash functions
 .gitconfig    | Git configuration
+.motd         | Message of the day to be printed on opening bash
 .path         | Folders to be included in the path
 .vimrc        | Vim customization
 
