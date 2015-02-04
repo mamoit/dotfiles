@@ -18,6 +18,7 @@ alias lt='ls -lt'
 alias ltr='ls -ltr'
 
 # GIT Aliases
+alias g='git'
 alias co='git checkout'
 alias ci='git commit'
 alias st='git status'
