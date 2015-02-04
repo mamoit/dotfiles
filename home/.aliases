@@ -15,7 +15,9 @@ alias ll='ls -l'
 alias l='ls -l'
 alias la='ls -la'
 alias lt='ls -lt'
+alias lat='ls -lat'
 alias ltr='ls -ltr'
+alias latr='ls -latr'
 
 # GIT Aliases
 alias g='git'
