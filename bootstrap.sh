@@ -12,8 +12,8 @@ function doIt() {
 
 function testGit() {
 	if [ -f ~/.gitconfig ]; then
-		name=`awk '/name/{print $3}' ~/.gitconfig`
-		email=`awk '/email/{print $3}' ~/.gitconfig`
+		name=`grep name ~/.gitconfig | cut -d\  -f3-`
+		email=`grep email ~/.gitconfig | cut -d\  -f3-`
 
 		if [[ $email =~ "" && $name =~ "" ]]; then
 			echo "WARNING: assuming $email as the default email for GIT (you may change it on your ~/.gitconfig)"
