@@ -13,10 +13,13 @@ fi
 # BASH Aliases
 alias ll='ls -l'
 alias l='ls -l'
+alias lh='ls -lh'
 alias la='ls -la'
 alias lt='ls -lt'
+alias lth='ls -lth'
 alias lat='ls -lat'
 alias ltr='ls -ltr'
+alias ltrh='ls -ltrh'
 alias latr='ls -latr'
 
 # GIT Aliases
