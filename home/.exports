@@ -2,3 +2,5 @@
 export EDITOR="vim";
 export GIT_EDITOR="vim";
 
+# Place where the local installs will go to
+export LOCAL_INSTALL_FOLDER=$HOME/local;
