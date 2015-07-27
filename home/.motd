@@ -1,1 +1,7 @@
-echo "Hello master!"
+MOTD="Welcome to $HOSTNAME!"
+
+if which figlet > /dev/null; then
+    figlet -tf smslant $MOTD
+else
+    echo $MOTD
+fi
