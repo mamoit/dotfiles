@@ -31,7 +31,7 @@ File          | Usage
 .bash_prompt  | Bash prompt colors, completions and whatnot
 .bashrc       | Entry point for all the other files, no need to change this
 .exports      | Some local variables
-.extras       | Name says it all, anything that doesn't fit anywhere else
+.extras       | Name says it all, anything that is local and should not be commited
 .functions    | Bash functions
 .gitconfig    | Git configuration
 .motd         | Message of the day to be printed on opening bash
