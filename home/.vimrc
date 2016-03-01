@@ -1,5 +1,10 @@
 " VIM configurations
 
+" VIMplug configuration
+call plug#begin('~/.vim/plugged')
+Plug 'https://github.com/kien/ctrlp.vim'
+call plug#end()
+
 " Syntax highlighting
 syntax on
 
