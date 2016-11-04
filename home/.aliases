@@ -31,3 +31,9 @@ alias br='git branch'
 alias d='git diff'
 alias dp='git diff --patience'
 alias padd='git add -p'
+
+# Docker stuff
+alias centos='docker run --rm -it centos bash'
+alias centos-7='docker run --rm -it centos:7 bash'
+
+alias ubuntu='docker run --rm -it ubuntu bash'
