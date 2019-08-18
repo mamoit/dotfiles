@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
+set -e
+
 cd "$(dirname "${BASH_SOURCE}")";
-git pull origin master;
 
 function doIt() {
 	testGit
-	rsync --exclude ".git/" --exclude "bootstrap.sh" --exclude "README.md"\
-		 -avh --no-perms home/ ~;
+	rsync --exclude ".extras" -avh --no-perms home/ ~/;
 	source ~/.bash_profile;
 }
 
