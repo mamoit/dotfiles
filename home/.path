@@ -1,5 +1,2 @@
 # ~/bin
 export PATH="$PATH:$LOCAL_INSTALL_FOLDER/bin";
-
-# ~/.local/bin
-export PATH="$PATH:~/.local/bin";
