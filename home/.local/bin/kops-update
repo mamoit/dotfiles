@@ -16,4 +16,3 @@ unlink ${NAME}
 ln -s ${NAME}-v${VERSION} ${NAME}
 
 echo Done
-
