@@ -6,13 +6,22 @@ LOCAL=${LOCAL_INSTALL_FOLDER}/bin
 REPO="kubernetes/kops"
 NAME="kops"
 VERSION=$(http GET https://api.github.com/repos/${REPO}/releases/latest | jq -r '.name')
+FILENAME=${NAME}-v${VERSION}
+
+cd ${LOCAL}
+
+if [ -a ${FILENAME} ]; then
+	echo Already at latest version ${VERSION}
+	exit 0
+fi
 
 echo Downloading ${VERSION}
 
-cd ${LOCAL}
-wget -O ${NAME}-v${VERSION} https://github.com/${REPO}/releases/download/${VERSION}/kops-linux-amd64
-chmod +x ${NAME}-v${VERSION}
-unlink ${NAME}
-ln -s ${NAME}-v${VERSION} ${NAME}
+wget -O ${FILENAME} https://github.com/${REPO}/releases/download/${VERSION}/kops-linux-amd64
+chmod +x ${FILENAME}
+if [ -h ${NAME} ]; then
+	unlink ${NAME}
+fi
+ln -s ${FILENAME} ${NAME}
 
 echo Done

@@ -6,13 +6,22 @@ LOCAL=${LOCAL_INSTALL_FOLDER}/bin
 REPO="kubernetes-sigs/kustomize"
 NAME="kustomize"
 VERSION=$(http GET https://api.github.com/repos/${REPO}/releases/latest | jq -r '.name')
+FILENAME=${NAME}-${VERSION}
+
+cd ${LOCAL}
+
+if [ -a ${FILENAME} ]; then
+	echo Already at latest version ${VERSION}
+	exit 0
+fi
 
 echo Downloading ${VERSION}
 
-cd ${LOCAL}
-wget -O ${NAME}-${VERSION} https://github.com/${REPO}/releases/download/${VERSION}/kustomize_$(echo ${VERSION} | sed 's/^v//g')_linux_amd64
-chmod +x ${NAME}-${VERSION}
-unlink ${NAME}
-ln -s ${NAME}-${VERSION} ${NAME}
+wget -O ${FILENAME} https://github.com/${REPO}/releases/download/${VERSION}/kustomize_$(echo ${VERSION} | sed 's/^v//g')_linux_amd64
+chmod +x ${FILENAME}
+if [ -h ${NAME} ]; then
+	unlink ${NAME}
+fi
+ln -s ${FILENAME} ${NAME}
 
 echo Done

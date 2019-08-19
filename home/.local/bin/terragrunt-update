@@ -6,13 +6,22 @@ LOCAL=${LOCAL_INSTALL_FOLDER}/bin
 REPO="gruntwork-io/terragrunt"
 NAME="terragrunt"
 VERSION=$(http GET https://api.github.com/repos/${REPO}/releases/latest | jq -r '.name')
+FILENAME=${NAME}-${VERSION}
+
+cd ${LOCAL}
+
+if [ -a ${FILENAME} ]; then
+	echo Already at latest version ${VERSION}
+	exit 0
+fi
 
 echo Downloading ${VERSION}
 
-cd ${LOCAL}
-wget -O ${NAME}-${VERSION} https://github.com/${REPO}/releases/download/${VERSION}/terragrunt_linux_amd64
-chmod +x ${NAME}-${VERSION}
-unlink ${NAME}
-ln -s ${NAME}-${VERSION} ${NAME}
+wget -O ${FILENAME} https://github.com/${REPO}/releases/download/${VERSION}/terragrunt_linux_amd64
+chmod +x ${FILENAME}
+if [ -h ${NAME} ]; then
+	unlink ${NAME}
+fi
+ln -s ${FILENAME} ${NAME}
 
 echo Done
