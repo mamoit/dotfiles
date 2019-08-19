@@ -128,5 +128,9 @@ if ! shopt -oq posix; then
 	elif [ -f /etc/bash_completion ]; then
 		. /etc/bash_completion
 	fi
+	if [ -d $LOCAL_INSTALL_FOLDER/bash_completion ]; then
+		for f in $(find $LOCAL_INSTALL_FOLDER/bash_completion -type f); do
+			. $f
+		done
+	fi
 fi
-
