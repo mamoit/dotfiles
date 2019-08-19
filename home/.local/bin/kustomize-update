@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+LOCAL=~/.local/bin
+REPO="kubernetes-sigs/kustomize"
+NAME="kustomize"
+VERSION=$(http GET https://api.github.com/repos/${REPO}/releases/latest | jq -r '.name')
+
+echo Downloading ${VERSION}
+
+cd ${LOCAL}
+wget -O ${NAME}-${VERSION} https://github.com/${REPO}/releases/download/${VERSION}/kustomize_$(echo ${VERSION} | sed 's/^v//g')_linux_amd64
+chmod +x ${NAME}-${VERSION}
+unlink ${NAME}
+ln -s ${NAME}-${VERSION} ${NAME}
+
+echo Done
+
