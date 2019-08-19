@@ -2,7 +2,7 @@
 
 set -e
 
-LOCAL=~/.local/bin
+LOCAL=${LOCAL_INSTALL_FOLDER}/bin
 REPO="gruntwork-io/terragrunt"
 NAME="terragrunt"
 VERSION=$(http GET https://api.github.com/repos/${REPO}/releases/latest | jq -r '.name')
