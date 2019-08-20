@@ -134,3 +134,9 @@ if ! shopt -oq posix; then
 		done
 	fi
 fi
+
+# Bash history
+HISTCONTROL=ignoreboth
+HISTSIZE=500
+HISTFILESIZE=500
+
