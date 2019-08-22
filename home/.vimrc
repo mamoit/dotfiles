@@ -2,7 +2,7 @@
 
 " VIMplug configuration
 call plug#begin('~/.vim/plugged')
-Plug 'https://github.com/kien/ctrlp.vim'
+Plug 'https://github.com/ctrlpvim/ctrlp.vim'
 call plug#end()
 
 " Syntax highlighting
