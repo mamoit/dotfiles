@@ -24,6 +24,7 @@ alias latr='ls -latr'
 
 # GIT Aliases
 alias g='git'
+alias gr='git rev-parse --show-toplevel > /dev/null && cd $(git rev-parse --show-toplevel)'
 alias co='git checkout'
 alias ci='git commit'
 alias st='git status'
