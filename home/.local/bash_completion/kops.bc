@@ -14,7 +14,7 @@
 # limitations under the License.
 # bash completion for kops                                 -*- shell-script -*-
 
-__debug()
+__kops_debug()
 {
     if [[ -n ${BASH_COMP_DEBUG_FILE} ]]; then
         echo "$*" >> "${BASH_COMP_DEBUG_FILE}"
@@ -23,13 +23,13 @@ __debug()
 
 # Homebrew on Macs have version 1.3 of bash-completion which doesn't include
 # _init_completion. This is a very minimal version of that function.
-__my_init_completion()
+__kops_init_completion()
 {
     COMPREPLY=()
     _get_comp_words_by_ref "$@" cur prev words cword
 }
 
-__index_of_word()
+__kops_index_of_word()
 {
     local w word=$1
     shift
@@ -41,7 +41,7 @@ __index_of_word()
     index=-1
 }
 
-__contains_word()
+__kops_contains_word()
 {
     local w word=$1; shift
     for w in "$@"; do
@@ -50,9 +50,9 @@ __contains_word()
     return 1
 }
 
-__handle_reply()
+__kops_handle_reply()
 {
-    __debug "${FUNCNAME[0]}"
+    __kops_debug "${FUNCNAME[0]}"
     case $cur in
         -*)
             if [[ $(type -t compopt) = "builtin" ]]; then
@@ -76,15 +76,15 @@ __handle_reply()
                 fi
 
                 local index flag
-                flag="${cur%%=*}"
-                __index_of_word "${flag}" "${flags_with_completion[@]}"
+                flag="${cur%=*}"
+                __kops_index_of_word "${flag}" "${flags_with_completion[@]}"
+                COMPREPLY=()
                 if [[ ${index} -ge 0 ]]; then
-                    COMPREPLY=()
                     PREFIX=""
                     cur="${cur#*=}"
                     ${flags_completion[${index}]}
                     if [ -n "${ZSH_VERSION}" ]; then
-                        # zfs completion needs --flag= prefix
+                        # zsh completion needs --flag= prefix
                         eval "COMPREPLY=( \"\${COMPREPLY[@]/#/${flag}=}\" )"
                     fi
                 fi
@@ -95,7 +95,7 @@ __handle_reply()
 
     # check if we are handling a flag with special work handling
     local index
-    __index_of_word "${prev}" "${flags_with_completion[@]}"
+    __kops_index_of_word "${prev}" "${flags_with_completion[@]}"
     if [[ ${index} -ge 0 ]]; then
         ${flags_completion[${index}]}
         return
@@ -124,25 +124,34 @@ __handle_reply()
         declare -F __custom_func >/dev/null && __custom_func
     fi
 
-    __ltrim_colon_completions "$cur"
+    # available in bash-completion >= 2, not always present on macOS
+    if declare -F __ltrim_colon_completions >/dev/null; then
+        __ltrim_colon_completions "$cur"
+    fi
+
+    # If there is only 1 completion and it is a flag with an = it will be completed
+    # but we don't want a space after the =
+    if [[ "${#COMPREPLY[@]}" -eq "1" ]] && [[ $(type -t compopt) = "builtin" ]] && [[ "${COMPREPLY[0]}" == --*= ]]; then
+       compopt -o nospace
+    fi
 }
 
 # The arguments should be in the form "ext1|ext2|extn"
-__handle_filename_extension_flag()
+__kops_handle_filename_extension_flag()
 {
     local ext="$1"
     _filedir "@(${ext})"
 }
 
-__handle_subdirs_in_dir_flag()
+__kops_handle_subdirs_in_dir_flag()
 {
     local dir="$1"
     pushd "${dir}" >/dev/null 2>&1 && _filedir -d && popd >/dev/null 2>&1
 }
 
-__handle_flag()
+__kops_handle_flag()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __kops_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
     # if a command required a flag, and we found it, unset must_have_one_flag()
     local flagname=${words[c]}
@@ -150,30 +159,33 @@ __handle_flag()
     # if the word contained an =
     if [[ ${words[c]} == *"="* ]]; then
         flagvalue=${flagname#*=} # take in as flagvalue after the =
-        flagname=${flagname%%=*} # strip everything after the =
+        flagname=${flagname%=*} # strip everything after the =
         flagname="${flagname}=" # but put the = back
     fi
-    __debug "${FUNCNAME[0]}: looking for ${flagname}"
-    if __contains_word "${flagname}" "${must_have_one_flag[@]}"; then
+    __kops_debug "${FUNCNAME[0]}: looking for ${flagname}"
+    if __kops_contains_word "${flagname}" "${must_have_one_flag[@]}"; then
         must_have_one_flag=()
     fi
 
     # if you set a flag which only applies to this command, don't show subcommands
-    if __contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
+    if __kops_contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
       commands=()
     fi
 
     # keep flag value with flagname as flaghash
-    if [ -n "${flagvalue}" ] ; then
-        flaghash[${flagname}]=${flagvalue}
-    elif [ -n "${words[ $((c+1)) ]}" ] ; then
-        flaghash[${flagname}]=${words[ $((c+1)) ]}
-    else
-        flaghash[${flagname}]="true" # pad "true" for bool flag
+    # flaghash variable is an associative array which is only supported in bash > 3.
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        if [ -n "${flagvalue}" ] ; then
+            flaghash[${flagname}]=${flagvalue}
+        elif [ -n "${words[ $((c+1)) ]}" ] ; then
+            flaghash[${flagname}]=${words[ $((c+1)) ]}
+        else
+            flaghash[${flagname}]="true" # pad "true" for bool flag
+        fi
     fi
 
     # skip the argument to a two word flag
-    if __contains_word "${words[c]}" "${two_word_flags[@]}"; then
+    if __kops_contains_word "${words[c]}" "${two_word_flags[@]}"; then
         c=$((c+1))
         # if we are looking for a flags value, don't show commands
         if [[ $c -eq $cword ]]; then
@@ -185,13 +197,13 @@ __handle_flag()
 
 }
 
-__handle_noun()
+__kops_handle_noun()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __kops_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
-    if __contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
+    if __kops_contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
         must_have_one_noun=()
-    elif __contains_word "${words[c]}" "${noun_aliases[@]}"; then
+    elif __kops_contains_word "${words[c]}" "${noun_aliases[@]}"; then
         must_have_one_noun=()
     fi
 
@@ -199,42 +211,42 @@ __handle_noun()
     c=$((c+1))
 }
 
-__handle_command()
+__kops_handle_command()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __kops_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
     local next_command
     if [[ -n ${last_command} ]]; then
         next_command="_${last_command}_${words[c]//:/__}"
     else
         if [[ $c -eq 0 ]]; then
-            next_command="_$(basename "${words[c]//:/__}")"
+            next_command="_kops_root_command"
         else
             next_command="_${words[c]//:/__}"
         fi
     fi
     c=$((c+1))
-    __debug "${FUNCNAME[0]}: looking for ${next_command}"
-    declare -F $next_command >/dev/null && $next_command
+    __kops_debug "${FUNCNAME[0]}: looking for ${next_command}"
+    declare -F "$next_command" >/dev/null && $next_command
 }
 
-__handle_word()
+__kops_handle_word()
 {
     if [[ $c -ge $cword ]]; then
-        __handle_reply
+        __kops_handle_reply
         return
     fi
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __kops_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
     if [[ "${words[c]}" == -* ]]; then
-        __handle_flag
-    elif __contains_word "${words[c]}" "${commands[@]}"; then
-        __handle_command
-    elif [[ $c -eq 0 ]] && __contains_word "$(basename "${words[c]}")" "${commands[@]}"; then
-        __handle_command
+        __kops_handle_flag
+    elif __kops_contains_word "${words[c]}" "${commands[@]}"; then
+        __kops_handle_command
+    elif [[ $c -eq 0 ]]; then
+        __kops_handle_command
     else
-        __handle_noun
+        __kops_handle_noun
     fi
-    __handle_word
+    __kops_handle_word
 }
 
 _kops_completion()
@@ -248,6 +260,9 @@ _kops_completion()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
     flags+=("--shell=")
     local_nonpersistent_flags+=("--shell=")
     flags+=("--alsologtostderr")
@@ -282,6 +297,8 @@ _kops_create_cluster()
     local_nonpersistent_flags+=("--admin-access=")
     flags+=("--api-loadbalancer-type=")
     local_nonpersistent_flags+=("--api-loadbalancer-type=")
+    flags+=("--api-ssl-certificate=")
+    local_nonpersistent_flags+=("--api-ssl-certificate=")
     flags+=("--associate-public-ip")
     local_nonpersistent_flags+=("--associate-public-ip")
     flags+=("--authorization=")
@@ -294,6 +311,8 @@ _kops_create_cluster()
     local_nonpersistent_flags+=("--cloud=")
     flags+=("--cloud-labels=")
     local_nonpersistent_flags+=("--cloud-labels=")
+    flags+=("--disable-subnet-tags")
+    local_nonpersistent_flags+=("--disable-subnet-tags")
     flags+=("--dns=")
     local_nonpersistent_flags+=("--dns=")
     flags+=("--dns-zone=")
@@ -302,6 +321,8 @@ _kops_create_cluster()
     local_nonpersistent_flags+=("--dry-run")
     flags+=("--encrypt-etcd-storage")
     local_nonpersistent_flags+=("--encrypt-etcd-storage")
+    flags+=("--etcd-storage-type=")
+    local_nonpersistent_flags+=("--etcd-storage-type=")
     flags+=("--image=")
     local_nonpersistent_flags+=("--image=")
     flags+=("--kubernetes-version=")
@@ -577,6 +598,39 @@ _kops_create_secret_sshpublickey()
     noun_aliases=()
 }
 
+_kops_create_secret_weavepassword()
+{
+    last_command="kops_create_secret_weavepassword"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--=")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--=")
+    flags+=("--force")
+    local_nonpersistent_flags+=("--force")
+    flags+=("--alsologtostderr")
+    flags+=("--config=")
+    flags+=("--log_backtrace_at=")
+    flags+=("--log_dir=")
+    flags+=("--logtostderr")
+    flags+=("--name=")
+    flags+=("--state=")
+    flags+=("--stderrthreshold=")
+    flags+=("--v=")
+    two_word_flags+=("-v")
+    flags+=("--vmodule=")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _kops_create_secret()
 {
     last_command="kops_create_secret"
@@ -585,6 +639,7 @@ _kops_create_secret()
     commands+=("encryptionconfig")
     commands+=("keypair")
     commands+=("sshpublickey")
+    commands+=("weavepassword")
 
     flags=()
     two_word_flags=()
@@ -936,6 +991,8 @@ _kops_export_kubecfg()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--kubeconfig=")
+    local_nonpersistent_flags+=("--kubeconfig=")
     flags+=("--alsologtostderr")
     flags+=("--config=")
     flags+=("--log_backtrace_at=")
@@ -1226,6 +1283,8 @@ _kops_rolling-update_cluster()
     local_nonpersistent_flags+=("--force")
     flags+=("--instance-group=")
     local_nonpersistent_flags+=("--instance-group=")
+    flags+=("--instance-group-roles=")
+    local_nonpersistent_flags+=("--instance-group-roles=")
     flags+=("--interactive")
     flags+=("-i")
     local_nonpersistent_flags+=("--interactive")
@@ -1233,6 +1292,10 @@ _kops_rolling-update_cluster()
     local_nonpersistent_flags+=("--master-interval=")
     flags+=("--node-interval=")
     local_nonpersistent_flags+=("--node-interval=")
+    flags+=("--post-drain-delay=")
+    local_nonpersistent_flags+=("--post-drain-delay=")
+    flags+=("--validation-timeout=")
+    local_nonpersistent_flags+=("--validation-timeout=")
     flags+=("--yes")
     flags+=("-y")
     local_nonpersistent_flags+=("--yes")
@@ -1451,6 +1514,10 @@ _kops_toolbox_template()
     local_nonpersistent_flags+=("--format-yaml")
     flags+=("--output=")
     local_nonpersistent_flags+=("--output=")
+    flags+=("--set=")
+    local_nonpersistent_flags+=("--set=")
+    flags+=("--set-string=")
+    local_nonpersistent_flags+=("--set-string=")
     flags+=("--snippets=")
     local_nonpersistent_flags+=("--snippets=")
     flags+=("--template=")
@@ -1594,6 +1661,7 @@ _kops_upgrade_cluster()
     flags+=("--channel=")
     local_nonpersistent_flags+=("--channel=")
     flags+=("--yes")
+    flags+=("-y")
     local_nonpersistent_flags+=("--yes")
     flags+=("--alsologtostderr")
     flags+=("--config=")
@@ -1712,6 +1780,8 @@ _kops_version()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--short")
+    local_nonpersistent_flags+=("--short")
     flags+=("--alsologtostderr")
     flags+=("--config=")
     flags+=("--log_backtrace_at=")
@@ -1729,7 +1799,7 @@ _kops_version()
     noun_aliases=()
 }
 
-_kops()
+_kops_root_command()
 {
     last_command="kops"
     commands=()
@@ -1780,7 +1850,7 @@ __start_kops()
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -s || return
     else
-        __my_init_completion -n "=" || return
+        __kops_init_completion -n "=" || return
     fi
 
     local c=0
@@ -1795,7 +1865,7 @@ __start_kops()
     local last_command
     local nouns=()
 
-    __handle_word
+    __kops_handle_word
 }
 
 if [[ $(type -t compopt) = "builtin" ]]; then

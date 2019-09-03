@@ -107,7 +107,13 @@ __helm_handle_reply()
     fi
 
     if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
-        declare -F __custom_func >/dev/null && __custom_func
+		if declare -F __helm_custom_func >/dev/null; then
+			# try command name qualified custom func
+			__helm_custom_func
+		else
+			# otherwise fall back to unqualified for compatibility
+			declare -F ___custom_func >/dev/null && __custom_func
+		fi
     fi
 
     # available in bash-completion >= 2, not always present on macOS
@@ -229,6 +235,14 @@ __helm_handle_word()
         __helm_handle_command
     elif [[ $c -eq 0 ]]; then
         __helm_handle_command
+    elif __helm_contains_word "${words[c]}" "${command_aliases[@]}"; then
+        # aliashash variable is an associative array which is only supported in bash > 3.
+        if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+            words[c]=${aliashash[${words[c]}]}
+            __helm_handle_command
+        else
+            __helm_handle_noun
+        fi
     else
         __helm_handle_noun
     fi
@@ -238,6 +252,9 @@ __helm_handle_word()
 _helm_completion()
 {
     last_command="helm_completion"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -267,6 +284,9 @@ _helm_completion()
 _helm_create()
 {
     last_command="helm_create"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -294,6 +314,9 @@ _helm_create()
 _helm_delete()
 {
     last_command="helm_delete"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -340,6 +363,9 @@ _helm_delete()
 _helm_dependency_build()
 {
     last_command="helm_dependency_build"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -368,6 +394,9 @@ _helm_dependency_build()
 _helm_dependency_list()
 {
     last_command="helm_dependency_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -392,6 +421,9 @@ _helm_dependency_list()
 _helm_dependency_update()
 {
     last_command="helm_dependency_update"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -422,10 +454,21 @@ _helm_dependency_update()
 _helm_dependency()
 {
     last_command="helm_dependency"
+
+    command_aliases=()
+
     commands=()
     commands+=("build")
     commands+=("list")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("ls")
+        aliashash["ls"]="list"
+    fi
     commands+=("update")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("up")
+        aliashash["up"]="update"
+    fi
 
     flags=()
     two_word_flags=()
@@ -449,6 +492,9 @@ _helm_dependency()
 _helm_fetch()
 {
     last_command="helm_fetch"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -502,6 +548,9 @@ _helm_fetch()
 _helm_get_hooks()
 {
     last_command="helm_get_hooks"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -540,6 +589,9 @@ _helm_get_hooks()
 _helm_get_manifest()
 {
     last_command="helm_get_manifest"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -578,6 +630,9 @@ _helm_get_manifest()
 _helm_get_notes()
 {
     last_command="helm_get_notes"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -616,6 +671,9 @@ _helm_get_notes()
 _helm_get_values()
 {
     last_command="helm_get_values"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -627,6 +685,8 @@ _helm_get_values()
     flags+=("--all")
     flags+=("-a")
     local_nonpersistent_flags+=("--all")
+    flags+=("--output=")
+    local_nonpersistent_flags+=("--output=")
     flags+=("--revision=")
     local_nonpersistent_flags+=("--revision=")
     flags+=("--tls")
@@ -657,6 +717,9 @@ _helm_get_values()
 _helm_get()
 {
     last_command="helm_get"
+
+    command_aliases=()
+
     commands=()
     commands+=("hooks")
     commands+=("manifest")
@@ -671,6 +734,8 @@ _helm_get()
 
     flags+=("--revision=")
     local_nonpersistent_flags+=("--revision=")
+    flags+=("--template=")
+    local_nonpersistent_flags+=("--template=")
     flags+=("--tls")
     local_nonpersistent_flags+=("--tls")
     flags+=("--tls-ca-cert=")
@@ -699,6 +764,9 @@ _helm_get()
 _helm_history()
 {
     last_command="helm_history"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -742,6 +810,9 @@ _helm_history()
 _helm_home()
 {
     last_command="helm_home"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -766,6 +837,9 @@ _helm_home()
 _helm_init()
 {
     last_command="helm_init"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -841,6 +915,9 @@ _helm_init()
 _helm_inspect_chart()
 {
     last_command="helm_inspect_chart"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -853,6 +930,8 @@ _helm_inspect_chart()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -883,6 +962,9 @@ _helm_inspect_chart()
 _helm_inspect_readme()
 {
     last_command="helm_inspect_readme"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -895,6 +977,8 @@ _helm_inspect_readme()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -921,6 +1005,9 @@ _helm_inspect_readme()
 _helm_inspect_values()
 {
     last_command="helm_inspect_values"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -933,6 +1020,8 @@ _helm_inspect_values()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -963,6 +1052,9 @@ _helm_inspect_values()
 _helm_inspect()
 {
     last_command="helm_inspect"
+
+    command_aliases=()
+
     commands=()
     commands+=("chart")
     commands+=("readme")
@@ -978,6 +1070,8 @@ _helm_inspect()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -1008,6 +1102,9 @@ _helm_inspect()
 _helm_install()
 {
     last_command="helm_install"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1016,6 +1113,8 @@ _helm_install()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--atomic")
+    local_nonpersistent_flags+=("--atomic")
     flags+=("--ca-file=")
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
@@ -1045,6 +1144,8 @@ _helm_install()
     local_nonpersistent_flags+=("--no-hooks")
     flags+=("--password=")
     local_nonpersistent_flags+=("--password=")
+    flags+=("--render-subchart-notes")
+    local_nonpersistent_flags+=("--render-subchart-notes")
     flags+=("--replace")
     local_nonpersistent_flags+=("--replace")
     flags+=("--repo=")
@@ -1096,6 +1197,9 @@ _helm_install()
 _helm_lint()
 {
     last_command="helm_lint"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1133,6 +1237,9 @@ _helm_lint()
 _helm_list()
 {
     last_command="helm_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1206,6 +1313,9 @@ _helm_list()
 _helm_package()
 {
     last_command="helm_package"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1248,6 +1358,9 @@ _helm_package()
 _helm_plugin_install()
 {
     last_command="helm_plugin_install"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1274,6 +1387,9 @@ _helm_plugin_install()
 _helm_plugin_list()
 {
     last_command="helm_plugin_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1298,6 +1414,9 @@ _helm_plugin_list()
 _helm_plugin_remove()
 {
     last_command="helm_plugin_remove"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1322,6 +1441,9 @@ _helm_plugin_remove()
 _helm_plugin_update()
 {
     last_command="helm_plugin_update"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1346,6 +1468,9 @@ _helm_plugin_update()
 _helm_plugin()
 {
     last_command="helm_plugin"
+
+    command_aliases=()
+
     commands=()
     commands+=("install")
     commands+=("list")
@@ -1371,9 +1496,39 @@ _helm_plugin()
     noun_aliases=()
 }
 
+_helm_push()
+{
+    last_command="helm_push"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--debug")
+    flags+=("--home=")
+    flags+=("--host=")
+    flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
+    flags+=("--tiller-connection-timeout=")
+    flags+=("--tiller-namespace=")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _helm_repo_add()
 {
     last_command="helm_repo_add"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1410,6 +1565,9 @@ _helm_repo_add()
 _helm_repo_index()
 {
     last_command="helm_repo_index"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1438,6 +1596,9 @@ _helm_repo_index()
 _helm_repo_list()
 {
     last_command="helm_repo_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1462,6 +1623,9 @@ _helm_repo_list()
 _helm_repo_remove()
 {
     last_command="helm_repo_remove"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1486,6 +1650,9 @@ _helm_repo_remove()
 _helm_repo_update()
 {
     last_command="helm_repo_update"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1494,6 +1661,8 @@ _helm_repo_update()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--strict")
+    local_nonpersistent_flags+=("--strict")
     flags+=("--debug")
     flags+=("--home=")
     flags+=("--host=")
@@ -1510,12 +1679,23 @@ _helm_repo_update()
 _helm_repo()
 {
     last_command="helm_repo"
+
+    command_aliases=()
+
     commands=()
     commands+=("add")
     commands+=("index")
     commands+=("list")
     commands+=("remove")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("rm")
+        aliashash["rm"]="remove"
+    fi
     commands+=("update")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("up")
+        aliashash["up"]="update"
+    fi
 
     flags=()
     two_word_flags=()
@@ -1539,6 +1719,9 @@ _helm_repo()
 _helm_reset()
 {
     last_command="helm_reset"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1580,6 +1763,9 @@ _helm_reset()
 _helm_rollback()
 {
     last_command="helm_rollback"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1588,6 +1774,8 @@ _helm_rollback()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--cleanup-on-fail")
+    local_nonpersistent_flags+=("--cleanup-on-fail")
     flags+=("--description=")
     local_nonpersistent_flags+=("--description=")
     flags+=("--dry-run")
@@ -1630,6 +1818,9 @@ _helm_rollback()
 _helm_search()
 {
     last_command="helm_search"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1665,6 +1856,9 @@ _helm_search()
 _helm_serve()
 {
     last_command="helm_serve"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1695,6 +1889,9 @@ _helm_serve()
 _helm_status()
 {
     last_command="helm_status"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1736,6 +1933,9 @@ _helm_status()
 _helm_template()
 {
     last_command="helm_template"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1787,6 +1987,9 @@ _helm_template()
 _helm_test()
 {
     last_command="helm_test"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1797,6 +2000,8 @@ _helm_test()
 
     flags+=("--cleanup")
     local_nonpersistent_flags+=("--cleanup")
+    flags+=("--parallel")
+    local_nonpersistent_flags+=("--parallel")
     flags+=("--timeout=")
     local_nonpersistent_flags+=("--timeout=")
     flags+=("--tls")
@@ -1827,6 +2032,9 @@ _helm_test()
 _helm_upgrade()
 {
     last_command="helm_upgrade"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1835,10 +2043,14 @@ _helm_upgrade()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--atomic")
+    local_nonpersistent_flags+=("--atomic")
     flags+=("--ca-file=")
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--cleanup-on-fail")
+    local_nonpersistent_flags+=("--cleanup-on-fail")
     flags+=("--description=")
     local_nonpersistent_flags+=("--description=")
     flags+=("--devel")
@@ -1862,6 +2074,8 @@ _helm_upgrade()
     local_nonpersistent_flags+=("--password=")
     flags+=("--recreate-pods")
     local_nonpersistent_flags+=("--recreate-pods")
+    flags+=("--render-subchart-notes")
+    local_nonpersistent_flags+=("--render-subchart-notes")
     flags+=("--repo=")
     local_nonpersistent_flags+=("--repo=")
     flags+=("--reset-values")
@@ -1915,6 +2129,9 @@ _helm_upgrade()
 _helm_verify()
 {
     last_command="helm_verify"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1941,6 +2158,9 @@ _helm_verify()
 _helm_version()
 {
     last_command="helm_version"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1987,22 +2207,44 @@ _helm_version()
 _helm_root_command()
 {
     last_command="helm"
+
+    command_aliases=()
+
     commands=()
     commands+=("completion")
     commands+=("create")
     commands+=("delete")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("del")
+        aliashash["del"]="delete"
+    fi
     commands+=("dependency")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("dep")
+        aliashash["dep"]="dependency"
+        command_aliases+=("dependencies")
+        aliashash["dependencies"]="dependency"
+    fi
     commands+=("fetch")
     commands+=("get")
     commands+=("history")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("hist")
+        aliashash["hist"]="history"
+    fi
     commands+=("home")
     commands+=("init")
     commands+=("inspect")
     commands+=("install")
     commands+=("lint")
     commands+=("list")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("ls")
+        aliashash["ls"]="list"
+    fi
     commands+=("package")
     commands+=("plugin")
+    commands+=("push")
     commands+=("repo")
     commands+=("reset")
     commands+=("rollback")
@@ -2038,6 +2280,7 @@ __start_helm()
 {
     local cur prev words cword
     declare -A flaghash 2>/dev/null || :
+    declare -A aliashash 2>/dev/null || :
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -s || return
     else
