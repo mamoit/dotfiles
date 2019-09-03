@@ -3,6 +3,7 @@
 " VIMplug configuration
 call plug#begin('~/.vim/plugged')
 Plug 'https://github.com/ctrlpvim/ctrlp.vim'
+Plug 'airblade/vim-gitgutter'
 call plug#end()
 
 " Syntax highlighting
@@ -39,4 +40,7 @@ set smartindent
 set tabstop=4
 set shiftwidth=4
 " set softtabstop=2
+
+" git-gutter-options
+set updatetime=250
 
