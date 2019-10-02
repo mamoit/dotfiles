@@ -4,7 +4,10 @@
 call plug#begin('~/.vim/plugged')
 Plug 'https://github.com/ctrlpvim/ctrlp.vim'
 Plug 'airblade/vim-gitgutter'
+Plug 'scrooloose/nerdtree'
 call plug#end()
+
+map <C-n> :NERDTreeToggle<CR>
 
 " Syntax highlighting
 syntax on
