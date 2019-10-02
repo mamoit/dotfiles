@@ -38,3 +38,7 @@ alias centos='docker run --rm -it centos bash'
 alias centos-7='docker run --rm -it centos:7 bash'
 
 alias ubuntu='docker run --rm -it ubuntu bash'
+
+# K8s stuff
+alias k='kubectl'
+
