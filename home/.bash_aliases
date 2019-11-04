@@ -29,7 +29,7 @@ alias co='git checkout'
 alias ci='git commit'
 alias st='git status'
 alias br='git branch'
-alias d='git diff --submodules=diff'
+alias d='git diff --submodule=diff'
 alias dp='git diff --patience'
 alias padd='git add -p'
 
