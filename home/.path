@@ -1,2 +1,5 @@
 # ~/bin
 export PATH="$PATH:$LOCAL_INSTALL_FOLDER/bin";
+
+# Rust
+export PATH="$PATH:$CARGO_HOME/bin"

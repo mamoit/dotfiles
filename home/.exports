@@ -5,3 +5,7 @@ export PAGER=less
 
 # Place where the local installs will go to
 export LOCAL_INSTALL_FOLDER=$HOME/.local;
+
+# Rust
+export RUSTUP_HOME=$LOCAL_INSTALL_FOLDER/rustup
+export CARGO_HOME=$LOCAL_INSTALL_FOLDER/cargo
