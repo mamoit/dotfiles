@@ -24,6 +24,11 @@ set mouse=a
 " Show the cursor position
 set ruler
 
+" Search configs
+set hlsearch
+set ignorecase
+set incsearch
+
 " Show the filename in the window titlebar
 set title
 
